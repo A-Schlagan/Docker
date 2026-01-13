@@ -1,0 +1,18 @@
+services:
+  db:
+    image: mariadb:10.9.8
+    container_name: mariadbphp
+    environment:
+      MARIADB_ROOT_PASSWORD: DAA
+      MARIADB_USER: dbuser #nicht root benutzen!
+      MARIADB_PASSWORD: DAA
+      MARIADB_DATABASE: adressen
+    ports:
+      - "33061:3306"
+  phpadmin: 
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: db
+    ports:
+      - "8088:80"
