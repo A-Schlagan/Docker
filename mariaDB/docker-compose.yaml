@@ -1,0 +1,13 @@
+services:
+  mariadb:
+    image: mariadb:10.9.8
+    container_name: mariadb
+    restart: unless-stopped
+    ports: 
+      - "33065:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: DAA
+      MARIADB_USER: root
+      MARIADB_PASSWORD: DAA
+    volumes:
+      - ./data:/var/lib/mysql
