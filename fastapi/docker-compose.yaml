@@ -1,6 +1,6 @@
 services:
   api:
-    image: phyton:3.11.5
+    image: phython:3.11.5
     build:
       context: .
       dockerfile: dockerfile
