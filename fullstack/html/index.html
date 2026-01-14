@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>meine toDo Liste</title>
+
+</head>
+
+<body>
+<h1>FastAPI Kundenliste</h1>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Geschlecht</th>            
+            <th>Vorname</th>
+            <th>Nachname</th>
+            <th>Firmenname</th>
+            <th>E-Mail</th>
+        </tr>
+    </thead>
+    <tbody id="kundenTabelle">
+    </tbody>
+</table>
+
+<div class="box" style="background-color: rgb(120, 170, 235); padding: 12px; margin-top: 12px;">
+    <h2>Kunden anzeigen:</h2>
+    <input id="eingabe" type="number" placeholder="ID eingeben" >
+    <button onclick="kundenabfrage()" style="margin-top: 12px;">Anzeigen</button>
+    <div id="kunde"></div>
+</div>
+
+<div class="box" style="background-color: rgb(226, 93, 93); padding: 12px; margin-top: 12px;">
+    <h2>Kunden löschen:</h2>
+    <input id="loeschID" type="number" placeholder="ID eingeben" >
+    <button onclick="kundenloeschen()" style="margin-top: 12px;">Löschen</button>
+    <div id="kundeDel"></div>
+</div>
+
+<div class="box" style="background-color: rgb(182, 228, 129); padding: 12px; margin-top: 12px;">
+    <h2> Kunden anlegen oder updaten </h2>
+    <form id="kundenForm">
+        <label>
+            Geschlecht:
+            <select id="geschlecht" required>
+                <option value="">Bitte wählen</option>
+                <option value="m">Herr</option>
+                <option value="w">Frau</option>
+            </select>
+        </label>
+        <br><br>
+
+        <input type="text" id="vorname" placeholder="Vorname" required><br><br>
+        <input type="text" id="nachname" placeholder="Nachname" required><br><br>
+        <input type="text" id="firmenname" placeholder="Firmenname"><br><br>
+        <input type="email" id="email" placeholder="E-Mail" required><br><br>
+
+        <button type="submit">Hinzufügen</button><br><br>
+        <input type="number" id="updateID" placeholder="ID für Update">   
+        <button type="button" onclick="kundeUpdaten()">Updaten</button>    
+    </form>
+
+    <div id="meldung"></div>
+</div>
+
+
+
+<script>
+async function zeigeAlleDaten(){
+const response = await fetch("http://127.0.0.1:8008/kunden");
+const data = await response.json();
+console.log(data);
+
+let rows = "";
+
+for (let x of data){
+    rows += `
+        <tr>
+            <td>${x.id}</td>
+            <td>${geschlechtText(x.geschlecht)}</td>            
+            <td>${x.vorname}</td>
+            <td>${x.nachname}</td>
+            <td>${x.firmenname}</td>
+            <td>${x.email}</td>
+        </tr>
+    `;
+}
+
+document.getElementById("kundenTabelle").innerHTML = rows;
+
+}
+
+
+function geschlechtText(g) {
+    if (g === "m") return "Herr";
+    if (g === "w") return "Frau";
+    return "divers";
+}
+
+async function kundenabfrage(){
+    const id = document.getElementById("eingabe").value;
+    const response = await fetch("http://127.0.0.1:8008/kunden/" + id);
+    const data = await response.json();
+    console.log(data);  
+    document.getElementById("kunde").innerHTML = `${data.id} - ${data.geschlecht} - ${data.nachname}-  ${data.firmenname} - ${data.email}`;
+
+}
+
+async function kundenloeschen() {
+    const id = document.getElementById("loeschID").value;
+    const response = await fetch("http://127.0.0.1:8008/kunden/" + id, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    });
+alert("Kunde gelöscht!");
+zeigeAlleDaten();
+    
+}
+//Kundendaten HINZUFÜGEN
+document.getElementById("kundenForm").addEventListener("submit", async function(e) {
+    e.preventDefault(); //verhindert neuladen
+
+    // Daten aus Formular
+    const kunde = {
+        geschlecht: document.getElementById("geschlecht").value,
+        vorname: document.getElementById("vorname").value,
+        nachname: document.getElementById("nachname").value,
+        firmenname: document.getElementById("firmenname").value,
+        email: document.getElementById("email").value
+    };
+
+    // zur API senden
+    const response = await fetch("http://127.0.0.1:8008/kunden", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(kunde)
+    });
+
+    const data = await response.json();
+    alert("Kunde gespeichert: " + data.vorname + " " + data.nachname);
+
+    document.getElementById("kundenForm").reset();  //Formular leeren
+    zeigeAlleDaten();    
+    });
+
+//Kundendaten UPDATEN
+
+async function kundeUpdaten() {
+    const id = document.getElementById("updateID").value;
+
+    if (!id) {
+        alert("Bitte ID für Update eingeben");
+        return;
+    }    
+
+    const kunde = {
+        geschlecht: document.getElementById("geschlecht").value,
+        vorname: document.getElementById("vorname").value,
+        nachname: document.getElementById("nachname").value,
+        firmenname: document.getElementById("firmenname").value,
+        email: document.getElementById("email").value
+    };
+
+    // zur API senden
+    const response = await fetch("http://127.0.0.1:8008/kunden/" + id, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(kunde)
+    });
+
+    const data = await response.json();
+    alert("Kundendaten aktualisiert");
+
+    zeigeAlleDaten();    
+    };
+
+zeigeAlleDaten();
+</script>
+
+    
+</body>
+</html>

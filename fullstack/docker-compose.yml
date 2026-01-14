@@ -1,0 +1,43 @@
+services:
+
+  database:
+    image: mariadb:10.9.8
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: DAA
+      MYSQL_DATABASE: adressen
+    volumes:
+      - ./data:/var/lib/mysql
+    ports:
+      - "33065:3306"
+    networks:
+      - backend
+
+  api:
+    depends_on:
+      - database
+    container_name: fastapi
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "8008:8000"
+    restart: unless-stopped
+    networks:
+      - backend
+
+  webserver:
+    image: nginx:1.26.2
+    container_name: webserver
+    ports:
+      - "8080:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+    restart: unless-stopped
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
