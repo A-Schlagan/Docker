@@ -1,0 +1,27 @@
+services:
+  # MariaDB Container
+  datenbank:
+    image: mariadb:10.9.8
+    container_name: datenbank
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: DAA
+      MYSQL_DATABASE: adressen
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "33065:3306"
+
+  # PHP & Apache Container
+  php-app:
+    build: .
+    container_name: php_container
+    ports:
+      - "8088:80"
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - datenbank
+
+volumes:
+  db_data:
